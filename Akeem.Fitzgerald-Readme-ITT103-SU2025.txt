@@ -1,0 +1,37 @@
+Authors: Akeem Fitzgerald  
+Date Created: July 15  
+Course: ITT103  
+GitHub Public URL to Code: https://github.com/Akeem-Fitzgerald/Hospital-Management-Systems-HMS-/commit/3375a97604065248d72cd06abd26db8b1cf1ae61  
+
+-------------------------------------------------------
+           Hospital Management System
+-------------------------------------------------------
+
+**Program Purpose:**  
+This program simulates a console-based Hospital Management System (HMS) designed to streamline administrative functions in a hospital. It allows users to register patients and doctors, schedule and cancel appointments, and generate patient bills.
+
+**How to Run the Program:**  
+1. Open the terminal or command prompt.
+2. Navigate to the folder where the Python script is located.
+3. Run the script using the command:  
+   `python hospital_system.py`  
+4. Follow the on-screen menu options to interact with the system.
+
+**Program Functionalities:**  
+- Register new patients with name, age, and gender, and assign a unique patient ID.
+- Add new doctors with name, age, gender, specialty, and a unique doctor ID.
+- Book appointments between patients and doctors, ensuring no time conflicts.
+- Cancel appointments using their appointment ID.
+- View patient profiles and doctor schedules.
+- Generate formatted billing receipts with consultation and service fees.
+
+**Required Modifications:**  
+- Add file handling or a database connection if you want to persist data between sessions.
+- Implement login credentials for different users (e.g., admin, receptionist).
+- Improve the user interface using a graphical UI library like Tkinter or migrate to a web-based interface using Flask or Django.
+
+**Assumptions and Limitations:**  
+- The system runs entirely in the console; data is lost once the program closes.
+- It assumes correct date and time input formats (e.g., YYYY-MM-DD and HH:MM).
+- The appointment availability is checked only for exact date and time matches.
+- Additional hospital services (e.g., test types or medication names) are not itemized.
