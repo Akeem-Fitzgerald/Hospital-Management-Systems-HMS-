@@ -1,0 +1,220 @@
+import random
+
+def generate_unique_id(prefix):
+    return f"{prefix}{random.randint(1000, 9999)}"
+
+def display_line():
+    print("-" * 50)
+
+class GeneralPerson:
+    def __init__(self, full_name, age_years, sex_identity):
+        self.full_name = full_name
+        self.age_years = age_years
+        self.sex_identity = sex_identity
+
+    def show_identity(self):
+        print(f"Name: {self.full_name} | Age: {self.age_years} | Gender: {self.sex_identity}")
+
+class HospitalPatient(GeneralPerson):
+    def __init__(self, full_name, age_years, sex_identity):
+        super().__init__(full_name, age_years, sex_identity)
+        self.patient_identifier = generate_unique_id("P")
+        self.meeting_list = []
+
+    def schedule_meeting(self, appointment_obj):
+        self.meeting_list.append(appointment_obj)
+
+    def review_profile(self):
+        display_line()
+        print("PATIENT PROFILE")
+        self.show_identity()
+        print(f"Patient ID: {self.patient_identifier}")
+        print(f"Appointments: {len(self.meeting_list)}")
+        display_line()
+
+class MedicalDoctor(GeneralPerson):
+    def __init__(self, full_name, age_years, sex_identity, field_speciality):
+        super().__init__(full_name, age_years, sex_identity)
+        self.doctor_identifier = generate_unique_id("D")
+        self.field_speciality = field_speciality
+        self.time_slots = []
+
+    def is_time_available(self, date_val, time_val):
+        return (date_val, time_val) not in self.time_slots
+
+    def view_availability(self):
+        display_line()
+        print("DOCTOR SCHEDULE")
+        self.show_identity()
+        print(f"Doctor ID: {self.doctor_identifier}")
+        print(f"Speciality: {self.field_speciality}")
+        print(f"Appointments: {len(self.time_slots)}")
+        display_line()
+
+class MedicalAppointment:
+    def __init__(self, patient_entity, doctor_entity, meet_date, meet_time):
+        self.appointment_identifier = generate_unique_id("A")
+        self.patient_entity = patient_entity
+        self.doctor_entity = doctor_entity
+        self.meet_date = meet_date
+        self.meet_time = meet_time
+        self.meeting_status = "Confirmed"
+
+    def cancel_meeting(self):
+        self.meeting_status = "Cancelled"
+
+class CoreHospitalSystem:
+    def __init__(self):
+        self.patient_registry = {}
+        self.doctor_registry = {}
+        self.total_appointments = []
+
+    def enroll_patient(self, name_val, age_val, gender_val):
+        new_patient = HospitalPatient(name_val, age_val, gender_val)
+        self.patient_registry[new_patient.patient_identifier] = new_patient
+        print(f"Patient registered with ID: {new_patient.patient_identifier}")
+
+    def enlist_doctor(self, name_val, age_val, gender_val, specialty_val):
+        new_doctor = MedicalDoctor(name_val, age_val, gender_val, specialty_val)
+        self.doctor_registry[new_doctor.doctor_identifier] = new_doctor
+        print(f"Doctor added with ID: {new_doctor.doctor_identifier}")
+
+    def make_appointment(self, patient_id, doctor_id, date_str, time_str):
+        try:
+            if patient_id not in self.patient_registry:
+                raise ValueError("Patient ID not found.")
+            if doctor_id not in self.doctor_registry:
+                raise ValueError("Doctor ID not found.")
+
+            doctor_obj = self.doctor_registry[doctor_id]
+            if not doctor_obj.is_time_available(date_str, time_str):
+                raise ValueError("Doctor is unavailable at that time.")
+
+            patient_obj = self.patient_registry[patient_id]
+            new_appointment = MedicalAppointment(patient_obj, doctor_obj, date_str, time_str)
+            self.total_appointments.append(new_appointment)
+            patient_obj.schedule_meeting(new_appointment)
+            doctor_obj.time_slots.append((date_str, time_str))
+
+            print(f"Appointment booked! ID: {new_appointment.appointment_identifier}")
+        except ValueError as issue:
+            print(f"Booking Error: {issue}")
+
+    def revoke_appointment(self, appointment_id):
+        found = False
+        for appt in self.total_appointments:
+            if appt.appointment_identifier == appointment_id:
+                appt.cancel_meeting()
+                print(f"Appointment {appointment_id} cancelled.")
+                found = True
+                break
+        if not found:
+            print("Appointment ID not found.")
+
+    def issue_bill(self, appointment_id):
+        appt_found = None
+        for appt in self.total_appointments:
+            if appt.appointment_identifier == appointment_id:
+                appt_found = appt
+                break
+
+        if not appt_found:
+            print("Appointment ID not found.")
+            return
+
+        try:
+            print("\nEnter any additional service charges (tests, medication):")
+            extra_fee = float(input("Additional Fee (JMD): "))
+            if extra_fee < 0:
+                raise ValueError("Fee cannot be negative.")
+
+            base_fee = 3000 - 100000
+            full_total = base_fee + extra_fee
+            display_line()
+            print("       WELCOME TO HARMONY CARE HOSPITAL")
+            print("------------ APPOINTMENT BILL ------------")
+            print(f"Patient: {appt_found.patient_entity.full_name}")
+            print(f"Doctor: {appt_found.doctor_entity.full_name}")
+            print(f"Date: {appt_found.meet_date} | Time: {appt_found.meet_time}")
+            print(f"Consultation Fee: JMD$ {base_fee}")
+            print(f"Extra Services: JMD$ {extra_fee}")
+            print(f"TOTAL AMOUNT DUE: JMD$ {full_total}")
+            display_line()
+        except ValueError as val_err:
+            print(f"Invalid entry: {val_err}")
+
+
+def show_menu(hospital_app):
+    while True:
+        print("\n----- HOSPITAL MANAGEMENT MAIN MENU -----")
+        print("1. Register New Patient")
+        print("2. Add New Doctor")
+        print("3. Schedule Appointment")
+        print("4. Cancel Appointment")
+        print("5. View Patient Profile")
+        print("6. View Doctor Schedule")
+        print("7. Generate Bill")
+        print("8. Exit")
+        choice = input("Select option (1–8): ")
+
+        if choice == "1":
+            try:
+                name = input("Full Name: ")
+                age = int(input("Age: "))
+                gender = input("Gender: ")
+                hospital_app.enroll_patient(name, age, gender)
+            except ValueError:
+                print("Invalid age entry. Please enter a numeric value.")
+
+        elif choice == "2":
+            try:
+                name = input("Doctor Name: ")
+                age = int(input("Age: "))
+                gender = input("Gender: ")
+                specialty = input("Speciality: ")
+                hospital_app.enlist_doctor(name, age, gender, specialty)
+            except ValueError:
+                print("Invalid age entry. Please enter a numeric value.")
+
+        elif choice == "3":
+            pat_id = input("Enter Patient ID: ")
+            doc_id = input("Enter Doctor ID: ")
+            date = input("Date (YYYY-MM-DD): ")
+            time = input("Time (e.g., 14:00): ")
+            hospital_app.make_appointment(pat_id, doc_id, date, time)
+
+        elif choice == "4":
+            appt_id = input("Enter Appointment ID to cancel: ")
+            hospital_app.revoke_appointment(appt_id)
+
+        elif choice == "5":
+            pat_id = input("Enter Patient ID: ")
+            patient = hospital_app.patient_registry.get(pat_id)
+            if patient:
+                patient.review_profile()
+            else:
+                print("Patient not found.")
+
+        elif choice == "6":
+            doc_id = input("Enter Doctor ID: ")
+            doctor = hospital_app.doctor_registry.get(doc_id)
+            if doctor:
+                doctor.view_availability()
+            else:
+                print("Doctor not found.")
+
+        elif choice == "7":
+            appt_id = input("Enter Appointment ID for billing: ")
+            hospital_app.issue_bill(appt_id)
+
+        elif choice == "8":
+            print("Exiting HMS... Goodbye!")
+            break
+
+        else:
+            print("Invalid option. Please select between 1–8.")
+
+
+if __name__ == "__main__":
+    hospital_program = CoreHospitalSystem()
+    show_menu(hospital_program)
